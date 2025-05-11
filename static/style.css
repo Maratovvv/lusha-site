@@ -101,3 +101,46 @@ input {
     font-style: italic;
     margin-left: 10px;
 }
+@media (max-width: 600px) {
+    body {
+        padding-top: 20px;
+        font-size: 15px;
+    }
+
+    .container {
+        padding: 20px;
+        width: 95%;
+    }
+
+    input {
+        width: 90%;
+        font-size: 15px;
+    }
+
+    button {
+        padding: 8px 14px;
+        font-size: 14px;
+        width: 90%;
+        margin-top: 10px;
+    }
+
+    .examples {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .examples button {
+        width: 40%;
+        margin: 5px;
+    }
+
+    #chat-box {
+        max-width: 100%;
+        font-size: 14px;
+    }
+
+    .message {
+        font-size: 13px;
+    }
+}
