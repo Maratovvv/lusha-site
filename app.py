@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import random
 import requests
 from datetime import datetime
+import pytz  # для часового пояса
 
 app = Flask(__name__)
 
@@ -23,7 +24,7 @@ def get_weather(city_name):
         temp = weather_data['main']['temp']
         desc = weather_data['weather'][0]['description']
         wind = weather_data['wind']['speed']
-        return f"Сейчас в {city_name.capitalize()} {temp}°C, {desc}, ветер {wind} м/с."
+        return f"{city_name.capitalize()}: {temp} градусов, {desc}, ветер {wind} м/с."
     except Exception as e:
         return f"Ошибка при получении погоды: {str(e)}"
 
@@ -55,8 +56,9 @@ def ask():
         else:
             return jsonify({'answer': 'Пожалуйста, уточни город.'})
     elif 'время' in question:
-        now = datetime.now().strftime('%H:%M')
-        return jsonify({'answer': f'Сейчас {now}'})
+        tz = pytz.timezone('Asia/Bishkek')
+        now = datetime.now(tz).strftime('%H:%M')
+        return jsonify({'answer': f'В Бишкеке сейчас {now} (GMT+6)'})
     elif 'дата' in question:
         date = datetime.now().strftime('%d.%m.%Y')
         return jsonify({'answer': f'Сегодня {date}'})
@@ -67,7 +69,7 @@ def ask():
             "Интересная тема! Расскажи подробнее.",
             "Хм... любопытно. Давай разберёмся вместе!",
             "Это хороший вопрос. Я бы тоже хотела узнать больше.",
-            "Поясни, пожалуйста, что именно ты хочешь узнать? ",
+            "Поясни, пожалуйста, что именно ты хочешь узнать? 😊",
             "Это звучит как что-то важное. Расскажи подробнее!"
         ]
         return jsonify({'answer': random.choice(smart_phrases)})
