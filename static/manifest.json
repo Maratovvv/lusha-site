@@ -1,0 +1,17 @@
+
+{
+  "name": "Lusha",
+  "short_name": "Lusha",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2e2e2e",
+  "theme_color": "#800020",
+  "description": "Голосовой помощник Lusha",
+  "icons": [
+    {
+      "src": "/static/logo1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

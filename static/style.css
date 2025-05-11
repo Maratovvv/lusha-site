@@ -1,0 +1,103 @@
+body {
+    background-color: #2e2e2e;
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    text-align: center;
+    padding-top: 50px;
+}
+
+.container {
+    background-color: #3e3e3e;
+    padding: 30px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.logo {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: #800020;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    width: 300px;
+    font-size: 16px;
+}
+
+#chat-box {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    text-align: left;
+    font-size: 15px;
+    color: #eee;
+    width: 100%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.message-wrapper {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 10px;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.message-wrapper.user {
+    flex-direction: row-reverse;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+}
+
+.avatar.user {
+    background-image: url('/static/user.png');
+}
+
+.avatar.bot {
+    background-image: url('/static/logo2.png');
+}
+
+.message {
+    background-color: #444;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: white;
+    max-width: 80%;
+}
+
+.user .message {
+    background-color: #800020;
+}
+
+#typing.bot {
+    color: #aaa;
+    font-style: italic;
+    margin-left: 10px;
+}
