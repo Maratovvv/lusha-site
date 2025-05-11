@@ -62,7 +62,7 @@ def ask():
                 return jsonify({'answer': weather})
         return jsonify({'answer': 'Пожалуйста, укажи город. Например: погода в Бишкеке'})
     elif question.strip() == "погода":
-        return jsonify({'answer': 'Уточни, в каком городе ты хочешь узнать погоду 😊'})
+        return jsonify({'answer': 'Уточни, в каком городе ты хочешь узнать погоду '})
     elif 'время' in question:
         tz = pytz.timezone('Asia/Bishkek')
         now = datetime.now(tz).strftime('%H:%M')
