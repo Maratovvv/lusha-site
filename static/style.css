@@ -144,3 +144,23 @@ input {
         font-size: 13px;
     }
 }
+.subtitle {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #ccc;
+}
+.slogan {
+    font-size: 15px;
+    font-style: italic;
+    color: #aaa;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}

@@ -11,7 +11,9 @@
     <div class="container">
         <img src="/static/logo1.png" alt="Lusha logo" class="logo">
         <h1>Lusha</h1>
-        <p>Спроси что-нибудь у Lusha</p>
+        <p class="slogan">Всегда рядом — просто скажи.</p>
+        <p class="subtitle">Твой голосовой помощник. Отвечает на погоду, время, шутки и многое другое.</p>
+
 
         <div id="chat-box"></div>
 
@@ -26,11 +28,6 @@
             <button onclick="quickAsk('дата')">Дата</button>
             <button onclick="quickAsk('время')">Время</button>
             <button onclick="quickAsk('стоп')">Стоп</button>
-        </div>
-
-        <button onclick="toggleTheme()" class="theme-toggle">🌓 Переключить тему</button>
-    </div>
-
     <script>
         document.getElementById('inputText').focus();
         document.getElementById('inputText').addEventListener('keydown', function(e) {
