@@ -2,19 +2,22 @@ from flask import Flask, render_template, jsonify, request
 import random
 import requests
 from datetime import datetime
-import pytz  # для часового пояса
+import pytz
 
 app = Flask(__name__)
 
-OWM_API_KEY = "4d7d7e1630b63b79c40e0d9ae002126b"
+OWM_API_KEY = "4d7d7e1630b63b79c40e0d9ae002126b"  # временный ключ
 
 def get_weather(city_name):
     try:
+        if not city_name:
+            return "Пожалуйста, укажи город. Например: погода в Бишкеке"
+
         geo_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city_name}&limit=1&appid={OWM_API_KEY}"
         geo_response = requests.get(geo_url, timeout=5).json()
 
-        if not geo_response:
-            return "Не могу найти такой город."
+        if not isinstance(geo_response, list) or len(geo_response) == 0:
+            return "Я не смогла найти такой город. Проверь написание и попробуй снова 😊"
 
         lat = geo_response[0]['lat']
         lon = geo_response[0]['lon']
@@ -24,10 +27,11 @@ def get_weather(city_name):
         temp = weather_data['main']['temp']
         desc = weather_data['weather'][0]['description']
         wind = weather_data['wind']['speed']
-        return f"{city_name.capitalize()}: {temp} градусов, {desc}, ветер {wind} м/с."
+        return f"{city_name.capitalize()}: {temp}°C, {desc}, ветер {wind} м/с."
+
     except Exception as e:
-      import traceback
-      return f"Ошибка при получении погоды:\n{traceback.format_exc(limit=1)}"
+        import traceback
+        return f"Ошибка при получении погоды:\n{traceback.format_exc(limit=1)}"
 
 
 @app.route('/')
@@ -53,10 +57,12 @@ def ask():
         parts = question.split("погода в")
         if len(parts) > 1:
             city = parts[1].strip()
-            weather = get_weather(city)
-            return jsonify({'answer': weather})
-        else:
-            return jsonify({'answer': 'Пожалуйста, уточни город.'})
+            if city:
+                weather = get_weather(city)
+                return jsonify({'answer': weather})
+        return jsonify({'answer': 'Пожалуйста, укажи город. Например: погода в Бишкеке'})
+    elif question.strip() == "погода":
+        return jsonify({'answer': 'Уточни, в каком городе ты хочешь узнать погоду 😊'})
     elif 'время' in question:
         tz = pytz.timezone('Asia/Bishkek')
         now = datetime.now(tz).strftime('%H:%M')
