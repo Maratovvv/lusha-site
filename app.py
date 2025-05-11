@@ -1,10 +1,11 @@
 from flask import Flask, render_template, jsonify, request
 import random
 import requests
+from datetime import datetime  # ⬅️ добавим
+
 app = Flask(__name__)
 
-# OpenWeather API
-OWM_API_KEY = "4d7d7e1630b63b79c40e0d9ae002126b"  # временный ключ
+OWM_API_KEY = "4d7d7e1630b63b79c40e0d9ae002126b"
 
 def get_weather(city_name):
     try:
@@ -23,7 +24,6 @@ def get_weather(city_name):
         desc = weather_data['weather'][0]['description']
         wind = weather_data['wind']['speed']
         return f"Сейчас в {city_name.capitalize()} {temp}°C, {desc}, ветер {wind} м/с."
-
     except Exception as e:
         return f"Ошибка при получении погоды: {str(e)}"
 
@@ -54,6 +54,12 @@ def ask():
             return jsonify({'answer': weather})
         else:
             return jsonify({'answer': 'Пожалуйста, уточни город.'})
+    elif 'время' in question:
+        now = datetime.now().strftime('%H:%M')
+        return jsonify({'answer': f'Сейчас {now}'})
+    elif 'дата' in question:
+        date = datetime.now().strftime('%d.%m.%Y')
+        return jsonify({'answer': f'Сегодня {date}'})
     elif 'стоп' in question:
         return jsonify({'answer': 'Хорошо, отключаюсь.'})
     else:

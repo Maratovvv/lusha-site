@@ -11,13 +11,24 @@
     <div class="container">
         <img src="/static/logo1.png" alt="Lusha logo" class="logo">
         <h1>Lusha</h1>
-        <p>Спроси что-нибудь у Lusha 👇</p>
+        <p>Спроси что-нибудь у Lusha</p>
 
         <div id="chat-box"></div>
 
         <input type="text" id="inputText" placeholder="Например: погода в Бишкеке" />
         <button onclick="sendQuestion()">Спросить</button>
         <button onclick="startListening()">🎤 Говорить</button>
+
+        <div class="examples">
+            <p style="margin-bottom: 5px;">Попробуй:</p>
+            <button onclick="quickAsk('шутка')">Шутка</button>
+            <button onclick="quickAsk('погода в Бишкеке')">Погода</button>
+            <button onclick="quickAsk('дата')">Дата</button>
+            <button onclick="quickAsk('время')">Время</button>
+            <button onclick="quickAsk('стоп')">Стоп</button>
+        </div>
+
+        <button onclick="toggleTheme()" class="theme-toggle">🌓 Переключить тему</button>
     </div>
 
     <script>
@@ -76,6 +87,15 @@
             });
         }
 
+        function quickAsk(text) {
+            document.getElementById('inputText').value = text;
+            sendQuestion();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+        }
+
         function startListening() {
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'ru-RU';
@@ -94,9 +114,8 @@
             synth.speak(utterance);
         }
 
-        // Приветствие при загрузке страницы
         window.addEventListener('load', () => {
-            const greeting = 'Привет! Я Луша Чем могу помочь?';
+            const greeting = 'Привет! Я Луша. Чем могу помочь?';
             addMessage('bot', greeting);
             speak(greeting);
         });
