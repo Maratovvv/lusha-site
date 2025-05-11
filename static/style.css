@@ -27,6 +27,11 @@ button {
     font-size: 16px;
     border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #a11a30;
 }
 
 input {
@@ -90,6 +95,7 @@ input {
     font-size: 14px;
     color: white;
     max-width: 80%;
+    transition: all 0.3s ease-in-out;
 }
 
 .user .message {
@@ -100,7 +106,54 @@ input {
     color: #aaa;
     font-style: italic;
     margin-left: 10px;
+    position: relative;
 }
+
+#typing.bot::after {
+    content: ' ⠋';
+    display: inline-block;
+    animation: typingDots 1s steps(3) infinite;
+}
+
+@keyframes typingDots {
+    0% { content: ' ⠋'; }
+    25% { content: ' ⠙'; }
+    50% { content: ' ⠹'; }
+    75% { content: ' ⠸'; }
+    100% { content: ' ⠋'; }
+}
+
+.subtitle {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #ccc;
+}
+
+.slogan {
+    font-size: 15px;
+    font-style: italic;
+    color: #aaa;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.examples {
+    margin-top: 15px;
+}
+
+.examples button {
+    margin: 5px;
+}
+
+/* Mobile-first адаптация */
 @media (max-width: 600px) {
     body {
         padding-top: 20px;
@@ -142,25 +195,5 @@ input {
 
     .message {
         font-size: 13px;
-    }
-}
-.subtitle {
-    font-size: 16px;
-    margin-bottom: 20px;
-    color: #ccc;
-}
-.slogan {
-    font-size: 15px;
-    font-style: italic;
-    color: #aaa;
-    margin-top: -10px;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: fadeIn 2s ease forwards;
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
     }
 }
