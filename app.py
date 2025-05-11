@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import random
 import requests
-from datetime import datetime  # ⬅️ добавим
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -63,7 +63,14 @@ def ask():
     elif 'стоп' in question:
         return jsonify({'answer': 'Хорошо, отключаюсь.'})
     else:
-        return jsonify({'answer': 'Я пока не знаю, как ответить на это.'})
+        smart_phrases = [
+            "Интересная тема! Расскажи подробнее.",
+            "Хм... любопытно. Давай разберёмся вместе!",
+            "Это хороший вопрос. Я бы тоже хотела узнать больше.",
+            "Поясни, пожалуйста, что именно ты хочешь узнать? 😊",
+            "Это звучит как что-то важное. Расскажи подробнее!"
+        ]
+        return jsonify({'answer': random.choice(smart_phrases)})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
