@@ -2,26 +2,26 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lusha — Голосовой помощник</title>
-  <link rel="stylesheet" href="/static/style.css"/>
-  <link rel="icon" href="/static/logo.png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lusha — Voice Assistant</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" href="/static/logo.png" />
 </head>
 <body>
-  <audio id="bg-audio" autoplay loop>
-    <source src="/static/bg.mp3" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио.
+  <audio id="bg-audio" loop>
+    <source src="/static/bg.mp3" type="audio/mpeg" />
+    Your browser does not support the audio element.
   </audio>
 
   <div class="container">
-    <img src="/static/logo1.png" alt="Lusha logo" class="logo"/>
+    <img src="/static/logo1.png" alt="Lusha logo" class="logo" />
     <h1>Lusha</h1>
     <p class="slogan">Всегда рядом — просто скажи.</p>
     <p class="subtitle">Твой голосовой помощник. Отвечает на погоду, время, шутки и многое другое.</p>
 
     <div id="chat-box"></div>
 
-    <input type="text" id="inputText" placeholder="Например: погода в Бишкеке / What's the weather in London?"/>
+    <input type="text" id="inputText" placeholder="Например: погода в Бишкеке / What's the weather in London?" />
     <button onclick="sendQuestion()">Спросить</button>
     <button onclick="startListening()">🎤 Говорить</button>
     <button onclick="clearChat()">🧹 Очистить</button>
@@ -48,10 +48,14 @@
       }
     }
 
-    // для автозапуска после первого клика
-    window.addEventListener('click', () => {
-      if (bgAudio.paused) bgAudio.play().catch(() => {});
-    }, { once: true });
+    function clearChat() {
+      document.getElementById('chat-box').innerHTML = '';
+    }
+
+    function quickAsk(text) {
+      document.getElementById('inputText').value = text;
+      sendQuestion();
+    }
 
     document.getElementById('inputText').focus();
     document.getElementById('inputText').addEventListener('keydown', function(e) {
@@ -108,15 +112,6 @@
       });
     }
 
-    function quickAsk(text) {
-      document.getElementById('inputText').value = text;
-      sendQuestion();
-    }
-
-    function clearChat() {
-      document.getElementById('chat-box').innerHTML = '';
-    }
-
     function startListening() {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = 'ru-RU';
@@ -139,6 +134,13 @@
       const greeting = 'Привет! Я Луша. Чем могу помочь?';
       addMessage('bot', greeting);
       speak(greeting, 'ru-RU');
+
+      // Запуск музыки при первом взаимодействии
+      document.body.addEventListener('click', () => {
+        if (bgAudio.paused) {
+          bgAudio.play().catch(() => {});
+        }
+      }, { once: true });
     });
   </script>
 </body>
