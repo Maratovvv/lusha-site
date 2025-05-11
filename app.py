@@ -26,7 +26,9 @@ def get_weather(city_name):
         wind = weather_data['wind']['speed']
         return f"{city_name.capitalize()}: {temp} градусов, {desc}, ветер {wind} м/с."
     except Exception as e:
-        return f"Ошибка при получении погоды: {str(e)}"
+      import traceback
+      return f"Ошибка при получении погоды:\n{traceback.format_exc(limit=1)}"
+
 
 @app.route('/')
 def index():
@@ -58,7 +60,7 @@ def ask():
     elif 'время' in question:
         tz = pytz.timezone('Asia/Bishkek')
         now = datetime.now(tz).strftime('%H:%M')
-        return jsonify({'answer': f'В Бишкеке сейчас {now} (GMT+6)'})
+        return jsonify({'answer': f'В Бишкеке сейчас {now}'})
     elif 'дата' in question:
         date = datetime.now().strftime('%d.%m.%Y')
         return jsonify({'answer': f'Сегодня {date}'})
