@@ -1,27 +1,32 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lusha — Voice Assistant</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="icon" href="/static/logo.png">
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="icon" href="/static/logo.png" />
 </head>
 <body>
+    <audio id="click-sound" src="/static/click.mp3" preload="auto"></audio>
     <audio id="bg-audio" loop>
-        <source src="/static/bg.mp3" type="audio/mpeg">
+        <source src="/static/bg.mp3" type="audio/mpeg" />
         Ваш браузер не поддерживает аудио.
     </audio>
 
     <div class="container">
-        <img src="/static/logo1.png" alt="Lusha logo" class="logo">
+        <img src="/static/logo1.png" alt="Lusha logo" class="logo" />
         <h1>Lusha</h1>
         <p class="slogan">Всегда рядом — просто скажи.</p>
         <p class="subtitle">Твой голосовой помощник. Отвечает на погоду, время, шутки и многое другое.</p>
 
         <div id="chat-box"></div>
 
-        <input type="text" id="inputText" placeholder="Например: погода в Бишкеке / What's the weather in London?" />
+        <input
+            type="text"
+            id="inputText"
+            placeholder="Например: погода в Бишкеке / What's the weather in London?"
+        />
         <button onclick="sendQuestion()">Спросить</button>
         <button onclick="startListening()">🎤 Говорить</button>
         <button onclick="clearChat()">🧹 Очистить</button>
@@ -39,7 +44,7 @@
 
     <script>
         document.getElementById('inputText').focus();
-        document.getElementById('inputText').addEventListener('keydown', function(e) {
+        document.getElementById('inputText').addEventListener('keydown', function (e) {
             if (e.key === 'Enter') sendQuestion();
         });
 
@@ -50,9 +55,8 @@
 
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.style.backgroundImage = sender === 'bot'
-                ? "url('/static/logo1.png')"
-                : "url('/static/user.png')";
+            avatar.style.backgroundImage =
+                sender === 'bot' ? "url('/static/logo1.png')" : "url('/static/user.png')";
 
             const msg = document.createElement('div');
             msg.className = 'message ' + sender;
@@ -81,16 +85,16 @@
             fetch('/ask', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: input })
+                body: JSON.stringify({ question: input }),
             })
-            .then(res => res.json())
-            .then(data => {
-                const typingBox = document.getElementById('typing');
-                if (typingBox) typingBox.remove();
+                .then((res) => res.json())
+                .then((data) => {
+                    const typingBox = document.getElementById('typing');
+                    if (typingBox) typingBox.remove();
 
-                addMessage('bot', data.answer);
-                speak(data.answer);
-            });
+                    addMessage('bot', data.answer);
+                    speak(data.answer);
+                });
         }
 
         function quickAsk(text) {
@@ -102,7 +106,7 @@
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'ru-RU';
             recognition.start();
-            recognition.onresult = function(event) {
+            recognition.onresult = function (event) {
                 const text = event.results[0][0].transcript;
                 document.getElementById('inputText').value = text;
                 sendQuestion();
@@ -110,21 +114,19 @@
         }
 
         function speak(text) {
-    const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ru-RU';
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ru-RU';
 
-    const logo = document.querySelector('.logo');
-    if (logo) logo.classList.add('speaking');
+            const logo = document.querySelector('.logo');
+            if (logo) logo.classList.add('speaking');
 
-    utterance.onend = () => {
-        if (logo) logo.classList.remove('speaking');
-    };
+            utterance.onend = () => {
+                if (logo) logo.classList.remove('speaking');
+            };
 
-    synth.speak(utterance);
-}
-
-        
+            synth.speak(utterance);
+        }
 
         function clearChat() {
             document.getElementById('chat-box').innerHTML = '';
@@ -133,13 +135,25 @@
         function startMusic() {
             const bgAudio = document.getElementById('bg-audio');
             bgAudio.volume = 0.2;
-            bgAudio.play().then(() => {
-                document.getElementById('music-btn').innerText = "🔈 Музыка играет";
-            }).catch(err => {
-                alert('⚠️ Воспроизведение не разрешено автоматически. Нажми кнопку ещё раз.');
-                console.log(err);
-            });
+            bgAudio.play()
+                .then(() => {
+                    document.getElementById('music-btn').innerText = '🔈 Музыка играет';
+                })
+                .catch((err) => {
+                    alert('⚠️ Воспроизведение не разрешено автоматически. Нажми кнопку ещё раз.');
+                    console.log(err);
+                });
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const clickSound = document.getElementById('click-sound');
+            document.querySelectorAll('button').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    clickSound.currentTime = 0;
+                    clickSound.play();
+                });
+            });
+        });
 
         window.addEventListener('load', () => {
             const greeting = 'Привет! Я Луша. Чем могу помочь?';
@@ -149,4 +163,3 @@
     </script>
 </body>
 </html>
-

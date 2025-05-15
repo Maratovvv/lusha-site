@@ -43,3 +43,14 @@ function speak(text) {
     utterance.lang = 'ru-RU';
     speechSynthesis.speak(utterance);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const clickSound = document.getElementById('click-sound');
+
+    document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            clickSound.currentTime = 0;
+            clickSound.play();
+        });
+    });
+});
