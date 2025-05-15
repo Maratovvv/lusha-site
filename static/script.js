@@ -59,7 +59,7 @@ function drawParticle(p) {
 
 function animateParticles(particles) {
     let animationId;
-    canvas.classList.add('active'); // плавно показать канвас
+    canvas.classList.add('active');
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -83,7 +83,7 @@ function animateParticles(particles) {
 
     setTimeout(() => {
         cancelAnimationFrame(animationId);
-        canvas.classList.remove('active'); // плавно скрыть канвас
+        canvas.classList.remove('active');
         setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 500);
     }, 5000);
 }
@@ -125,7 +125,7 @@ function sendQuestion() {
         const thankReply = 'Пожалуйста! Всегда рада помочь 😊';
         addMessage('bot', thankReply);
         speak(thankReply);
-        launchEffect('confetti'); // фантики
+        launchEffect('confetti');
         return;
     }
 
@@ -133,7 +133,7 @@ function sendQuestion() {
         const praiseReply = 'Спасибо! Мне очень приятно 😊';
         addMessage('bot', praiseReply);
         speak(praiseReply);
-        launchEffect('heart'); // сердечки
+        launchEffect('heart');
         return;
     }
 
@@ -148,14 +148,14 @@ function sendQuestion() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: input }),
     })
-        .then((res) => res.json())
-        .then((data) => {
-            const typingBox = document.getElementById('typing');
-            if (typingBox) typingBox.remove();
+    .then(res => res.json())
+    .then(data => {
+        const typingBox = document.getElementById('typing');
+        if (typingBox) typingBox.remove();
 
-            addMessage('bot', data.answer);
-            speak(data.answer);
-        });
+        addMessage('bot', data.answer);
+        speak(data.answer);
+    });
 }
 
 function quickAsk(text) {

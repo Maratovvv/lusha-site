@@ -1,147 +1,261 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Lusha — Voice Assistant</title>
-    <link rel="stylesheet" href="/static/style.css" />
-    <link rel="icon" href="/static/logo.png" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lusha — Voice Assistant</title>
+<link rel="stylesheet" href="/static/style.css" />
+<link rel="icon" href="/static/logo.png" />
+<style>
+  /* Плавное появление/исчезновение канваса */
+  #effect-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #effect-canvas.active {
+    opacity: 1;
+  }
+</style>
 </head>
 <body>
-    <audio id="click-sound" src="/static/click.mp3" preload="auto"></audio>
+<audio id="click-sound" src="/static/click.mp3" preload="auto"></audio>
 
-    <div class="container">
-        <img src="/static/logo1.png" alt="Lusha logo" class="logo" />
-        <h1>Lusha</h1>
-        <p class="slogan">Всегда рядом — просто скажи.</p>
-        <p class="subtitle">Твой голосовой помощник. Отвечает на время, шутки и многое другое.</p>
+<div class="container">
+  <img src="/static/logo1.png" alt="Lusha logo" class="logo" />
+  <h1>Lusha</h1>
+  <p class="slogan">Всегда рядом — просто скажи.</p>
+  <p class="subtitle">Твой голосовой помощник. Отвечает на время, шутки и многое другое.</p>
 
-        <div id="chat-box"></div>
+  <div id="chat-box"></div>
 
-        <input
-            type="text"
-            id="inputText"
-            placeholder="Например: дата / What's the date today?"
-        />
-        <button onclick="sendQuestion()">Спросить</button>
-        <button onclick="startListening()">🎤 Говорить</button>
-        <button onclick="clearChat()">🧹 Очистить</button>
+  <input type="text" id="inputText" placeholder="Например: дата / What's the date today?" />
+  <button onclick="sendQuestion()">Спросить</button>
+  <button onclick="startListening()">🎤 Говорить</button>
+  <button onclick="clearChat()">🧹 Очистить</button>
 
-        <div class="examples">
-            <p style="margin-bottom: 5px;">Попробуй:</p>
-            <button onclick="quickAsk('шутка')">Шутка</button>
-            <button onclick="quickAsk('дата')">Дата</button>
-            <button onclick="quickAsk('время')">Время</button>
-            <button onclick="quickAsk('стоп')">Стоп</button>
-        </div>
-    </div>
+  <div class="examples">
+    <p style="margin-bottom: 5px;">Попробуй:</p>
+    <button onclick="quickAsk('шутка')">Шутка</button>
+    <button onclick="quickAsk('дата')">Дата</button>
+    <button onclick="quickAsk('время')">Время</button>
+    <button onclick="quickAsk('стоп')">Стоп</button>
+  </div>
+</div>
 
-    <script>
-        document.getElementById('inputText').focus();
-        document.getElementById('inputText').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') sendQuestion();
-        });
+<canvas id="effect-canvas"></canvas>
 
-        function addMessage(sender, text) {
-            const box = document.getElementById('chat-box');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'message-wrapper ' + sender;
+<script>
+  document.getElementById('inputText').focus();
+  document.getElementById('inputText').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') sendQuestion();
+  });
 
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            avatar.style.backgroundImage =
-                sender === 'bot' ? "url('/static/logo1.png')" : "url('/static/user.png')";
+  const canvas = document.getElementById('effect-canvas');
+  const ctx = canvas.getContext('2d');
 
-            const msg = document.createElement('div');
-            msg.className = 'message ' + sender;
-            msg.innerText = text;
+  function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
-            wrapper.appendChild(avatar);
-            wrapper.appendChild(msg);
-            box.appendChild(wrapper);
-            box.scrollTop = box.scrollHeight;
-        }
+  function createParticles(type) {
+      const particlesCount = 100;
+      const particles = [];
 
-        function sendQuestion() {
-            const inputField = document.getElementById('inputText');
-            const input = inputField.value.trim();
-            if (!input) return;
+      for (let i = 0; i < particlesCount; i++) {
+          particles.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height - canvas.height,
+              size: Math.random() * 8 + 5,
+              speedY: Math.random() * 3 + 2,
+              speedX: (Math.random() - 0.5) * 2,
+              rotation: Math.random() * 360,
+              rotationSpeed: (Math.random() - 0.5) * 10,
+              type: type,
+              color: `hsl(${Math.random() * 360}, 100%, 70%)`
+          });
+      }
+      return particles;
+  }
 
-            addMessage('user', input);
-            inputField.value = '';
+  function drawParticle(p) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
 
-            const typing = document.createElement('div');
-            typing.id = 'typing';
-            typing.className = 'bot';
-            typing.innerText = 'Lusha печатает...';
-            document.getElementById('chat-box').appendChild(typing);
+      if (p.type === 'confetti') {
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+      } else if (p.type === 'heart') {
+          ctx.fillStyle = 'red';
+          const s = p.size / 2;
+          ctx.beginPath();
+          ctx.moveTo(0, s);
+          ctx.bezierCurveTo(0, s - s * 1.2, -s, s - s * 1.2, -s, s / 3);
+          ctx.bezierCurveTo(-s, 0, 0, 0, 0, s / 3);
+          ctx.bezierCurveTo(0, 0, s, 0, s, s / 3);
+          ctx.bezierCurveTo(s, s - s * 1.2, 0, s - s * 1.2, 0, s);
+          ctx.closePath();
+          ctx.fill();
+      }
 
-            fetch('/ask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: input }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    const typingBox = document.getElementById('typing');
-                    if (typingBox) typingBox.remove();
+      ctx.restore();
+  }
 
-                    addMessage('bot', data.answer);
-                    speak(data.answer);
-                });
-        }
+  function animateParticles(particles) {
+      let animationId;
+      canvas.classList.add('active');
 
-        function quickAsk(text) {
-            document.getElementById('inputText').value = text;
-            sendQuestion();
-        }
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        function startListening() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'ru-RU';
-            recognition.start();
-            recognition.onresult = function (event) {
-                const text = event.results[0][0].transcript;
-                document.getElementById('inputText').value = text;
-                sendQuestion();
-            };
-        }
+          particles.forEach(p => {
+              p.y += p.speedY;
+              p.x += p.speedX;
+              p.rotation += p.rotationSpeed;
 
-        function speak(text) {
-            const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ru-RU';
+              if (p.y > canvas.height) {
+                  p.y = -p.size;
+                  p.x = Math.random() * canvas.width;
+              }
+              drawParticle(p);
+          });
 
-            const logo = document.querySelector('.logo');
-            if (logo) logo.classList.add('speaking');
+          animationId = requestAnimationFrame(animate);
+      }
 
-            utterance.onend = () => {
-                if (logo) logo.classList.remove('speaking');
-            };
+      animate();
 
-            synth.speak(utterance);
-        }
+      setTimeout(() => {
+          cancelAnimationFrame(animationId);
+          canvas.classList.remove('active');
+          setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 500);
+      }, 5000);
+  }
 
-        function clearChat() {
-            document.getElementById('chat-box').innerHTML = '';
-        }
+  function launchEffect(type) {
+      const particles = createParticles(type);
+      animateParticles(particles);
+  }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const clickSound = document.getElementById('click-sound');
-            document.querySelectorAll('button').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    clickSound.currentTime = 0;
-                    clickSound.play();
-                });
-            });
-        });
+  function addMessage(sender, text) {
+      const box = document.getElementById('chat-box');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'message-wrapper ' + sender;
 
-        window.addEventListener('load', () => {
-            const greeting = 'Привет! Я Луша. Чем могу помочь?';
-            addMessage('bot', greeting);
-            speak(greeting);
-        });
-    </script>
-    <canvas id="effect-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.style.backgroundImage =
+          sender === 'bot' ? "url('/static/logo1.png')" : "url('/static/user.png')";
+
+      const msg = document.createElement('div');
+      msg.className = 'message ' + sender;
+      msg.innerText = text;
+
+      wrapper.appendChild(avatar);
+      wrapper.appendChild(msg);
+      box.appendChild(wrapper);
+      box.scrollTop = box.scrollHeight;
+  }
+
+  function sendQuestion() {
+      const inputField = document.getElementById('inputText');
+      const input = inputField.value.trim();
+      if (!input) return;
+
+      addMessage('user', input);
+      inputField.value = '';
+
+      if (/спасибо|благодарю|thank you/i.test(input)) {
+          const thankReply = 'Пожалуйста! Всегда рада помочь 😊';
+          addMessage('bot', thankReply);
+          speak(thankReply);
+          launchEffect('confetti');
+          return;
+      }
+
+      if (/молодец|класс|отлично|хорошо|замечательно|прекрасно/i.test(input)) {
+          const praiseReply = 'Спасибо! Мне очень приятно 😊';
+          addMessage('bot', praiseReply);
+          speak(praiseReply);
+          launchEffect('heart');
+          return;
+      }
+
+      const typing = document.createElement('div');
+      typing.id = 'typing';
+      typing.className = 'bot';
+      typing.innerText = 'Lusha печатает...';
+      document.getElementById('chat-box').appendChild(typing);
+
+      fetch('/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: input }),
+      })
+          .then((res) => res.json())
+          .then((data) => {
+              const typingBox = document.getElementById('typing');
+              if (typingBox) typingBox.remove();
+
+              addMessage('bot', data.answer);
+              speak(data.answer);
+          });
+  }
+
+  function quickAsk(text) {
+      document.getElementById('inputText').value = text;
+      sendQuestion();
+  }
+
+  function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'ru-RU';
+      recognition.start();
+      recognition.onresult = function (event) {
+          const text = event.results[0][0].transcript;
+          document.getElementById('inputText').value = text;
+          sendQuestion();
+      };
+  }
+
+  function speak(text) {
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ru-RU';
+
+      const logo = document.querySelector('.logo');
+      if (logo) logo.classList.add('speaking');
+
+      utterance.onend = () => {
+          if (logo) logo.classList.remove('speaking');
+      };
+
+      synth.speak(utterance);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      const clickSound = document.getElementById('click-sound');
+      document.querySelectorAll('button').forEach((btn) => {
+          btn.addEventListener('click', () => {
+              clickSound.currentTime = 0;
+              clickSound.play();
+          });
+      });
+  });
+
+  window.addEventListener('load', () => {
+      const greeting = 'Привет! Я Луша. Чем могу помочь?';
+      addMessage('bot', greeting);
+      speak(greeting);
+  });
+</script>
 </body>
 </html>
