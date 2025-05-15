@@ -214,3 +214,12 @@ input {
     50% { transform: scale(1.08); }
     100% { transform: scale(1); }
 }
+#effect-canvas {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  #effect-canvas.active {
+    opacity: 1;
+  }
+  
