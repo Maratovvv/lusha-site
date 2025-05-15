@@ -9,33 +9,27 @@
 </head>
 <body>
     <audio id="click-sound" src="/static/click.mp3" preload="auto"></audio>
-    <audio id="bg-audio" loop>
-        <source src="/static/bg.mp3" type="audio/mpeg" />
-        Ваш браузер не поддерживает аудио.
-    </audio>
 
     <div class="container">
         <img src="/static/logo1.png" alt="Lusha logo" class="logo" />
         <h1>Lusha</h1>
         <p class="slogan">Всегда рядом — просто скажи.</p>
-        <p class="subtitle">Твой голосовой помощник. Отвечает на погоду, время, шутки и многое другое.</p>
+        <p class="subtitle">Твой голосовой помощник. Отвечает на время, шутки и многое другое.</p>
 
         <div id="chat-box"></div>
 
         <input
             type="text"
             id="inputText"
-            placeholder="Например: погода в Бишкеке / What's the weather in London?"
+            placeholder="Например: дата / What's the date today?"
         />
         <button onclick="sendQuestion()">Спросить</button>
         <button onclick="startListening()">🎤 Говорить</button>
         <button onclick="clearChat()">🧹 Очистить</button>
-        <button onclick="startMusic()" id="music-btn">🎵 Включить музыку</button>
 
         <div class="examples">
             <p style="margin-bottom: 5px;">Попробуй:</p>
             <button onclick="quickAsk('шутка')">Шутка</button>
-            <button onclick="quickAsk('погода в Бишкеке')">Погода</button>
             <button onclick="quickAsk('дата')">Дата</button>
             <button onclick="quickAsk('время')">Время</button>
             <button onclick="quickAsk('стоп')">Стоп</button>
@@ -130,19 +124,6 @@
 
         function clearChat() {
             document.getElementById('chat-box').innerHTML = '';
-        }
-
-        function startMusic() {
-            const bgAudio = document.getElementById('bg-audio');
-            bgAudio.volume = 0.2;
-            bgAudio.play()
-                .then(() => {
-                    document.getElementById('music-btn').innerText = '🔈 Музыка играет';
-                })
-                .catch((err) => {
-                    alert('⚠️ Воспроизведение не разрешено автоматически. Нажми кнопку ещё раз.');
-                    console.log(err);
-                });
         }
 
         document.addEventListener('DOMContentLoaded', () => {

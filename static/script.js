@@ -1,20 +1,27 @@
 async function sendMessage() {
-    const input = document.getElementById('user-input');
+    const input = document.getElementById('user-input'); 
+    if (!input) return;
+
     const message = input.value.trim();
     if (!message) return;
 
     addMessage('user', message);
     input.value = '';
 
-    const response = await fetch('/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: message })
-    });
+    try {
+        const response = await fetch('/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: message })
+        });
 
-    const data = await response.json();
-    addMessage('bot', data.answer);
-    speak(data.answer);
+        const data = await response.json();
+        addMessage('bot', data.answer);
+        speak(data.answer);
+    } catch (error) {
+        console.error('Ошибка при отправке сообщения:', error);
+        addMessage('bot', 'Извините, произошла ошибка при обработке запроса.');
+    }
 }
 
 function addMessage(sender, text) {
@@ -27,14 +34,28 @@ function addMessage(sender, text) {
 }
 
 function startRecognition() {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert('Ваш браузер не поддерживает распознавание речи');
+        return;
+    }
+
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = 'ru-RU';
+
     recognition.start();
 
     recognition.onresult = function(event) {
         const transcript = event.results[0][0].transcript;
-        document.getElementById('user-input').value = transcript;
-        sendMessage();
+        const input = document.getElementById('user-input'); 
+        if (input) {
+            input.value = transcript;
+            sendMessage();
+        }
+    };
+
+    recognition.onerror = function(event) {
+        console.error('Ошибка распознавания речи:', event.error);
+        alert('Ошибка распознавания речи: ' + event.error);
     };
 }
 
@@ -46,6 +67,7 @@ function speak(text) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const clickSound = document.getElementById('click-sound');
+    if (!clickSound) return;
 
     document.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', () => {

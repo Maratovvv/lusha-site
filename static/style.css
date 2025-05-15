@@ -41,17 +41,6 @@ button:active {
     box-shadow: 0 0 8px 3px rgba(255, 0, 0, 0.7);
 }
 
-#music-btn {
-    background-color: #444;
-    color: white;
-    margin-top: 10px;
-    transition: background-color 0.3s ease;
-}
-
-#music-btn:hover {
-    background-color: #666;
-}
-
 input {
     padding: 10px;
     border-radius: 8px;
