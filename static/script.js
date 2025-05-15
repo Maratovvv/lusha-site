@@ -21,7 +21,7 @@ function createParticles(type) {
         particles.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height - canvas.height,
-            size: Math.random() * 8 + 5,
+            size: type === 'heart' ? (Math.random() * 15 + 10) : (Math.random() * 8 + 5),
             speedY: Math.random() * 3 + 2,
             speedX: (Math.random() - 0.5) * 2,
             rotation: Math.random() * 360,
@@ -125,7 +125,7 @@ function sendQuestion() {
         const thankReply = 'Пожалуйста! Всегда рада помочь 😊';
         addMessage('bot', thankReply);
         speak(thankReply);
-        launchEffect('confetti');
+        launchEffect('confetti'); // фантики
         return;
     }
 
@@ -133,7 +133,7 @@ function sendQuestion() {
         const praiseReply = 'Спасибо! Мне очень приятно 😊';
         addMessage('bot', praiseReply);
         speak(praiseReply);
-        launchEffect('heart');
+        launchEffect('heart'); // сердечки
         return;
     }
 
