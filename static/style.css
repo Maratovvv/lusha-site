@@ -27,7 +27,7 @@ button {
     font-size: 16px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.2s ease;
 }
 
 button:hover {
@@ -209,7 +209,6 @@ input {
     }
 }
 
-/* ✅ Добавлено в самый конец */
 .logo.speaking {
     animation: pulse 1s infinite;
 }
@@ -218,4 +217,9 @@ input {
     0% { transform: scale(1); }
     50% { transform: scale(1.08); }
     100% { transform: scale(1); }
+}
+
+button:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 8px 3px rgba(255, 0, 0, 0.7);
 }
