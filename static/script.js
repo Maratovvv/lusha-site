@@ -43,7 +43,7 @@ function drawParticle(p) {
         ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
     } else if (p.type === 'heart') {
         ctx.fillStyle = 'red';
-        const s = p.size / 2;
+        const s = p.size * 1.5;  // увеличенный размер для сердца
         ctx.beginPath();
         ctx.moveTo(0, s);
         ctx.bezierCurveTo(0, s - s * 1.2, -s, s - s * 1.2, -s, s / 3);
