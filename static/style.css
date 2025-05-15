@@ -36,6 +36,11 @@ button:hover {
     box-shadow: 0 0 12px 4px rgba(255, 0, 0, 0.7);
 }
 
+button:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 8px 3px rgba(255, 0, 0, 0.7);
+}
+
 #music-btn {
     background-color: #444;
     color: white;
@@ -219,9 +224,4 @@ input {
     0% { transform: scale(1); }
     50% { transform: scale(1.08); }
     100% { transform: scale(1); }
-}
-
-button:active {
-    transform: scale(0.95);
-    box-shadow: 0 0 8px 3px rgba(255, 0, 0, 0.7);
 }
