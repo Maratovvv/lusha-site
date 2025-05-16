@@ -3,10 +3,13 @@ import random
 import requests
 from datetime import datetime
 import pytz
+import traceback
 
 app = Flask(__name__)
 
-OWM_API_KEY = "4d7d7e1630b63b79c40e0d9ae002126b"  # временный ключ
+OWM_API_KEY = "dbf1c332caec3ca0dc92ec2136609b42"
+NEWSAPI_API_KEY = "8869a92ee6144ffda2a31e5efed6e222"
+
 
 def get_weather(city_name):
     try:
@@ -29,10 +32,38 @@ def get_weather(city_name):
         wind = weather_data['wind']['speed']
         return f"{city_name.capitalize()}: {temp}°C, {desc}, ветер {wind} м/с."
 
-    except Exception as e:
-        import traceback
+    except Exception:
         return f"Ошибка при получении погоды:\n{traceback.format_exc(limit=1)}"
 
+def get_news():
+    try:
+        url = f"https://newsapi.org/v2/top-headlines?country=ru&apiKey={NEWSAPI_API_KEY}&pageSize=3"
+        res = requests.get(url, timeout=5)
+        if res.status_code != 200:
+            return "Не могу получить новости сейчас."
+        data = res.json()
+        articles = data.get('articles', [])
+        if not articles:
+            return "Новостей нет."
+        news_list = [f"- {a['title']}" for a in articles]
+        return "Последние новости:\n" + "\n".join(news_list)
+    except Exception:
+        return f"Ошибка при получении новостей:\n{traceback.format_exc(limit=1)}"
+
+def get_exchange_rate(currency_code):
+    try:
+        url = "https://open.er-api.com/v6/latest/KGS"  # Курсы относительно сома
+        res = requests.get(url, timeout=5)
+        if res.status_code != 200:
+            return "Не могу получить курс валют."
+        data = res.json()
+        rates = data.get('rates', {})
+        rate = rates.get(currency_code)
+        if not rate:
+            return "Курс не найден."
+        return f"Текущий курс {currency_code} к сому: {rate:.2f}"
+    except Exception:
+        return f"Ошибка при получении курса валют:\n{traceback.format_exc(limit=1)}"
 
 @app.route('/')
 def index():
@@ -43,44 +74,73 @@ def ask():
     data = request.get_json()
     question = data.get('question', '').lower()
 
-    if 'привет' in question:
+    # Приветствие
+    if any(word in question for word in ['привет', 'здравствуй', 'hello']):
         return jsonify({'answer': 'Привет! Чем могу помочь?'})
-    elif 'как дела' in question:
+
+    # Как дела
+    if any(word in question for word in ['как дела', 'как ты']):
         return jsonify({'answer': 'У меня всё отлично, спасибо!'})
-    elif 'шутка' in question:
+
+    # Шутка
+    if any(word in question for word in ['шутка', 'расскажи шутку', 'анекдот']):
         jokes = [
             'Почему компьютер не может держать секреты? Потому что у него слишком много окон.',
-            'Что сказал ноль восьмерке? Классный пояс!'
+            'Что сказал ноль восьмерке? Классный пояс!',
+            'Почему программисты любят кофе? Потому что без него нет кода!'
         ]
         return jsonify({'answer': random.choice(jokes)})
-    elif 'погода в' in question:
-        parts = question.split("погода в")
-        if len(parts) > 1:
-            city = parts[1].strip()
-            if city:
-                weather = get_weather(city)
-                return jsonify({'answer': weather})
-        return jsonify({'answer': 'Пожалуйста, укажи город. Например: погода в Бишкеке'})
-    elif question.strip() == "погода":
-        return jsonify({'answer': 'Уточни, в каком городе ты хочешь узнать погоду '})
-    elif 'время' in question:
+
+    # Погода
+    if 'погода' in question:
+        # Ищем город после "в" или "в городе"
+        import re
+        city_match = re.search(r'погода в ([а-яА-ЯёЁ\s\-]+)', question)
+        city = city_match.group(1).strip() if city_match else ''
+        if city:
+            weather = get_weather(city)
+            return jsonify({'answer': weather})
+        else:
+            return jsonify({'answer': 'Пожалуйста, укажи город для прогноза погоды. Например: погода в Бишкеке'})
+
+    # Новости
+    if any(word in question for word in ['новости', 'что нового', 'последние новости']):
+        news = get_news()
+        return jsonify({'answer': news})
+
+    # Курсы валют
+    if any(word in question for word in ['курс доллара', 'курс usd', 'курс доллар']):
+        rate = get_exchange_rate('USD')
+        return jsonify({'answer': rate})
+
+    if any(word in question for word in ['курс евро', 'курс eur', 'курс евро']):
+        rate = get_exchange_rate('EUR')
+        return jsonify({'answer': rate})
+
+    # Время
+    if any(word in question for word in ['время', 'который час']):
         tz = pytz.timezone('Asia/Bishkek')
         now = datetime.now(tz).strftime('%H:%M')
         return jsonify({'answer': f'В Бишкеке сейчас {now}'})
-    elif 'дата' in question:
+
+    # Дата
+    if any(word in question for word in ['дата', 'какое число', 'число']):
         date = datetime.now().strftime('%d.%m.%Y')
         return jsonify({'answer': f'Сегодня {date}'})
-    elif 'стоп' in question:
+
+    # Стоп
+    if any(word in question for word in ['стоп', 'выключись', 'закрой']):
         return jsonify({'answer': 'Хорошо, отключаюсь.'})
-    else:
-        smart_phrases = [
-            "Интересная тема! Расскажи подробнее.",
-            "Хм... любопытно. Давай разберёмся вместе!",
-            "Это хороший вопрос. Я бы тоже хотела узнать больше.",
-            "Поясни, пожалуйста, что именно ты хочешь узнать?",
-            "Это звучит как что-то важное. Расскажи подробнее!"
-        ]
-        return jsonify({'answer': random.choice(smart_phrases)})
+
+    # Ответ по умолчанию
+    smart_phrases = [
+        "Интересная тема! Расскажи подробнее.",
+        "Хм... любопытно. Давай разберёмся вместе!",
+        "Это хороший вопрос. Я бы тоже хотела узнать больше.",
+        "Поясни, пожалуйста, что именно ты хочешь узнать?",
+        "Это звучит как что-то важное. Расскажи подробнее!"
+    ]
+    return jsonify({'answer': random.choice(smart_phrases)})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
