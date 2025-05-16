@@ -1,16 +1,14 @@
 from flask import Flask, render_template, jsonify, request
 import random
 import requests
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 import pytz
 import traceback
 import re
-import feedparser  # добавлен импорт
 
 app = Flask(__name__)
 
 OWM_API_KEY = "dbf1c332caec3ca0dc92ec2136609b42"
-# NEWSAPI_API_KEY больше не нужен — удалён
 
 def get_weather(city_name):
     try:
@@ -36,37 +34,6 @@ def get_weather(city_name):
     except Exception:
         return f"Ошибка при получении погоды:\n{traceback.format_exc(limit=1)}"
 
-
-def get_kg_news(days_limit=3):
-    try:
-        feed_url = "https://kloop.kg/feed/"
-        feed = feedparser.parse(feed_url)
-        entries = feed.entries
-        if not entries:
-            return "Новостей нет."
-
-        news_list = []
-        now = datetime.now(timezone.utc)
-        limit_date = now - timedelta(days=days_limit)
-
-        for entry in entries:
-            if hasattr(entry, 'published_parsed'):
-                published = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
-            else:
-                continue
-            if published >= limit_date:
-                news_list.append(f"- {entry.title}")
-            if len(news_list) >= 5:
-                break
-
-        if not news_list:
-            return f"За последние {days_limit} дня(ей) новостей не найдено."
-
-        return "Последние новости Кыргызстана:\n" + "\n".join(news_list)
-    except Exception:
-        return f"Ошибка при получении новостей:\n{traceback.format_exc(limit=1)}"
-
-
 def get_exchange_rate(currency_code):
     try:
         url = "https://open.er-api.com/v6/latest/KGS"
@@ -83,11 +50,9 @@ def get_exchange_rate(currency_code):
     except Exception:
         return f"Ошибка при получении курса валют:\n{traceback.format_exc(limit=1)}"
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/ask', methods=['POST'])
 def ask():
@@ -117,11 +82,6 @@ def ask():
         else:
             return jsonify({'answer': 'Пожалуйста, укажи город для прогноза погоды. Например: погода в Бишкеке'})
 
-    # Новые новости Кыргызстана из RSS
-    if any(word in question for word in ['новости кыргызстана', 'новости кг', 'новости киргизии']):
-        news = get_kg_news()
-        return jsonify({'answer': news})
-
     if any(word in question for word in ['курс доллара', 'курс usd', 'курс доллар']):
         rate = get_exchange_rate('USD')
         return jsonify({'answer': rate})
@@ -150,7 +110,6 @@ def ask():
         "Это звучит как что-то важное. Расскажи подробнее!"
     ]
     return jsonify({'answer': random.choice(smart_phrases)})
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
