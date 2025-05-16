@@ -241,6 +241,11 @@
       synth.speak(utterance);
   }
 
+  function clearChat() {
+      document.getElementById('chat-box').innerHTML = '';
+      document.getElementById('inputText').focus();
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
       const clickSound = document.getElementById('click-sound');
       document.querySelectorAll('button').forEach((btn) => {
