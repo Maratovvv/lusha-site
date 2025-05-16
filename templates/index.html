@@ -31,6 +31,14 @@
   <p class="slogan">Всегда рядом — просто скажи.</p>
   <p class="subtitle">Твой голосовой помощник. Отвечает на время, шутки и многое другое.</p>
 
+  <!-- Новый переключатель языка -->
+  <label for="language-select">Выберите язык / Choose language:</label>
+  <select id="language-select" style="margin-bottom:10px;">
+    <option value="ru-RU" selected>Русский</option>
+    <option value="en-US">English</option>
+    <!-- Можно добавить другие языки -->
+  </select>
+
   <div id="chat-box"></div>
 
   <input type="text" id="inputText" placeholder="Например: дата / What's the date today?" />
@@ -165,26 +173,53 @@
       box.scrollTop = box.scrollHeight;
   }
 
+  // Синтез речи с выбором языка и голоса
+  const synth = window.speechSynthesis;
+  let voices = [];
+
+  function populateVoices() {
+    voices = synth.getVoices();
+  }
+  populateVoices();
+  if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = populateVoices;
+  }
+
+  function speak(text, lang) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+
+      // Подбираем голос по языку
+      const voice = voices.find(v => v.lang.startsWith(lang));
+      if (voice) {
+          utterance.voice = voice;
+      }
+
+      synth.speak(utterance);
+  }
+
   function sendQuestion() {
       const inputField = document.getElementById('inputText');
       const input = inputField.value.trim();
       if (!input) return;
 
+      const lang = document.getElementById('language-select').value;
+
       addMessage('user', input);
       inputField.value = '';
 
       if (/спасибо|благодарю|thank you/i.test(input)) {
-          const thankReply = 'Пожалуйста! Всегда рада помочь 😊';
+          const thankReply = lang.startsWith('en') ? 'You are welcome! Always happy to help 😊' : 'Пожалуйста! Всегда рада помочь 😊';
           addMessage('bot', thankReply);
-          speak(thankReply);
+          speak(thankReply, lang);
           launchEffect('confetti');
           return;
       }
 
       if (/молодец|класс|отлично|хорошо|замечательно|прекрасно/i.test(input)) {
-          const praiseReply = 'Спасибо! Мне очень приятно 😊';
+          const praiseReply = lang.startsWith('en') ? 'Thank you! I am very glad 😊' : 'Спасибо! Мне очень приятно 😊';
           addMessage('bot', praiseReply);
-          speak(praiseReply);
+          speak(praiseReply, lang);
           launchEffect('heart');
           return;
       }
@@ -192,13 +227,13 @@
       const typing = document.createElement('div');
       typing.id = 'typing';
       typing.className = 'bot';
-      typing.innerText = 'Lusha печатает...';
+      typing.innerText = lang.startsWith('en') ? 'Lusha is typing...' : 'Lusha печатает...';
       document.getElementById('chat-box').appendChild(typing);
 
       fetch('/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: input }),
+          body: JSON.stringify({ question: input, lang: lang }),
       })
           .then((res) => res.json())
           .then((data) => {
@@ -206,7 +241,7 @@
               if (typingBox) typingBox.remove();
 
               addMessage('bot', data.answer);
-              speak(data.answer);
+              speak(data.answer, lang);
           });
   }
 
@@ -217,28 +252,14 @@
 
   function startListening() {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'ru-RU';
+      const lang = document.getElementById('language-select').value;
+      recognition.lang = lang;
       recognition.start();
       recognition.onresult = function (event) {
           const text = event.results[0][0].transcript;
           document.getElementById('inputText').value = text;
           sendQuestion();
       };
-  }
-
-  function speak(text) {
-      const synth = window.speechSynthesis;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ru-RU';
-
-      const logo = document.querySelector('.logo');
-      if (logo) logo.classList.add('speaking');
-
-      utterance.onend = () => {
-          if (logo) logo.classList.remove('speaking');
-      };
-
-      synth.speak(utterance);
   }
 
   function clearChat() {
@@ -259,7 +280,7 @@
   window.addEventListener('load', () => {
       const greeting = 'Привет! Я Луша. Чем могу помочь?';
       addMessage('bot', greeting);
-      speak(greeting);
+      speak(greeting, 'ru-RU');
   });
 </script>
 </body>

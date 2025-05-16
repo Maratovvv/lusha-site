@@ -113,26 +113,53 @@ function addMessage(sender, text) {
     box.scrollTop = box.scrollHeight;
 }
 
+// Получаем доступные голоса для синтеза
+const synth = window.speechSynthesis;
+let voices = [];
+
+function populateVoices() {
+    voices = synth.getVoices();
+}
+populateVoices();
+if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = populateVoices;
+}
+
+function speak(text, lang = 'ru-RU') {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+
+    // Подбираем голос, который начинается с нужного языка
+    const voice = voices.find(v => v.lang.startsWith(lang));
+    if (voice) {
+        utterance.voice = voice;
+    }
+
+    synth.speak(utterance);
+}
+
 function sendQuestion() {
     const inputField = document.getElementById('inputText');
     const input = inputField.value.trim();
     if (!input) return;
 
+    const lang = document.getElementById('language-select')?.value || 'ru-RU';
+
     addMessage('user', input);
     inputField.value = '';
 
     if (/спасибо|благодарю|thank you/i.test(input)) {
-        const thankReply = 'Пожалуйста! Всегда рада помочь 😊';
+        const thankReply = lang.startsWith('en') ? 'You are welcome! Always happy to help 😊' : 'Пожалуйста! Всегда рада помочь 😊';
         addMessage('bot', thankReply);
-        speak(thankReply);
+        speak(thankReply, lang);
         launchEffect('confetti');
         return;
     }
 
     if (/молодец|класс|отлично|хорошо|замечательно|прекрасно/i.test(input)) {
-        const praiseReply = 'Спасибо! Мне очень приятно 😊';
+        const praiseReply = lang.startsWith('en') ? 'Thank you! I am very glad 😊' : 'Спасибо! Мне очень приятно 😊';
         addMessage('bot', praiseReply);
-        speak(praiseReply);
+        speak(praiseReply, lang);
         launchEffect('heart');
         return;
     }
@@ -140,13 +167,13 @@ function sendQuestion() {
     const typing = document.createElement('div');
     typing.id = 'typing';
     typing.className = 'bot';
-    typing.innerText = 'Lusha печатает...';
+    typing.innerText = lang.startsWith('en') ? 'Lusha is typing...' : 'Lusha печатает...';
     document.getElementById('chat-box').appendChild(typing);
 
     fetch('/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: input }),
+        body: JSON.stringify({ question: input, lang: lang }),
     })
         .then(res => res.json())
         .then(data => {
@@ -154,7 +181,7 @@ function sendQuestion() {
             if (typingBox) typingBox.remove();
 
             addMessage('bot', data.answer);
-            speak(data.answer);
+            speak(data.answer, lang);
         });
 }
 
@@ -165,7 +192,8 @@ function quickAsk(text) {
 
 function startListening() {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'ru-RU';
+    const lang = document.getElementById('language-select')?.value || 'ru-RU';
+    recognition.lang = lang;
     recognition.start();
     recognition.onresult = function (event) {
         const text = event.results[0][0].transcript;
@@ -174,23 +202,9 @@ function startListening() {
     };
 }
 
-function speak(text) {
-    const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ru-RU';
-
-    const logo = document.querySelector('.logo');
-    if (logo) logo.classList.add('speaking');
-
-    utterance.onend = () => {
-        if (logo) logo.classList.remove('speaking');
-    };
-
-    synth.speak(utterance);
-}
-
 function clearChat() {
     document.getElementById('chat-box').innerHTML = '';
+    document.getElementById('inputText').focus();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
