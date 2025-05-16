@@ -222,22 +222,3 @@ window.addEventListener('load', () => {
     addMessage('bot', greeting);
     speak(greeting);
 });
-let sessionData = {}; // Если нужно, можно расширять для сессий
-
-function sendGameCommand(command) {
-  addMessage('user', command);
-
-  const lang = document.getElementById('language-select')?.value || 'ru-RU';
-
-  fetch('/ask', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ question: command, lang: lang, session: sessionData })
-  })
-  .then(res => res.json())
-  .then(data => {
-    // Если хочешь, можно обновлять sessionData = data.session || {};
-    addMessage('bot', data.answer);
-    speak(data.answer, lang);
-  });
-}

@@ -10,41 +10,6 @@ app = Flask(__name__)
 
 OWM_API_KEY = "dbf1c332caec3ca0dc92ec2136609b42"
 
-# Развлекательный контент
-riddles = [
-    {"question": "Что всегда идёт, но никогда не приходит?", "answer": "время"},
-    {"question": "Что можно увидеть с закрытыми глазами?", "answer": "сон"},
-]
-
-quiz = [
-    {"question": "Сколько планет в Солнечной системе?", "answer": "8"},
-    {"question": "Столица Франции?", "answer": "париж"},
-]
-
-jokes_ru = [
-    "Почему компьютер не может держать секреты? Потому что у него слишком много окон.",
-    "Что сказал ноль восьмерке? Классный пояс!",
-    "Почему программисты любят кофе? Потому что без него нет кода!"
-]
-
-jokes_en = [
-    "Why can’t computers keep secrets? Because they have too many windows.",
-    "What did zero say to eight? Nice belt!",
-    "Why do programmers love coffee? Because without it, there is no code!"
-]
-
-facts_ru = [
-    "Человеческий мозг содержит около 86 миллиардов нейронов.",
-    "Зебры не могут спать в одиночестве.",
-    "Самая глубокая точка океана — Марианская впадина."
-]
-
-facts_en = [
-    "The human brain contains about 86 billion neurons.",
-    "Zebras cannot sleep alone.",
-    "The deepest point of the ocean is the Mariana Trench."
-]
-
 def get_weather(city_name, lang='ru'):
     try:
         if not city_name:
@@ -107,7 +72,6 @@ def ask():
     question = data.get('question', '').lower()
     lang = data.get('lang', 'ru-RU').lower()
 
-    # Приветствия
     if any(word in question for word in ['привет', 'здравствуй', 'hello']):
         if lang.startswith('en'):
             return jsonify({'answer': 'Hello! How can I help you?'})
@@ -118,26 +82,21 @@ def ask():
             return jsonify({'answer': "I'm doing great, thank you!"})
         return jsonify({'answer': 'У меня всё отлично, спасибо!'})
 
-    # Мини-игры и развлечения
-    if 'загадка' in question:
-        riddle = random.choice(riddles)
-        return jsonify({'answer': f"Загадка: {riddle['question']}"})
-
-    if 'викторина' in question:
-        q = random.choice(quiz)
-        return jsonify({'answer': f"Викторина: {q['question']}"})
-
-    if 'шутка' in question or 'joke' in question:
+    if any(word in question for word in ['шутка', 'расскажи шутку', 'анекдот', 'joke']):
+        jokes_ru = [
+            'Почему компьютер не может держать секреты? Потому что у него слишком много окон.',
+            'Что сказал ноль восьмерке? Классный пояс!',
+            'Почему программисты любят кофе? Потому что без него нет кода!'
+        ]
+        jokes_en = [
+            'Why can’t computers keep secrets? Because they have too many windows.',
+            'What did zero say to eight? Nice belt!',
+            'Why do programmers love coffee? Because without it, there is no code!'
+        ]
         if lang.startswith('en'):
             return jsonify({'answer': random.choice(jokes_en)})
         return jsonify({'answer': random.choice(jokes_ru)})
 
-    if 'факт' in question or 'fact' in question:
-        if lang.startswith('en'):
-            return jsonify({'answer': random.choice(facts_en)})
-        return jsonify({'answer': random.choice(facts_ru)})
-
-    # Погода
     if 'погода' in question or 'weather' in question:
         city_match = re.search(r'погода в ([а-яА-ЯёЁ\s\-]+)', question)
         if not city_match:
@@ -150,7 +109,6 @@ def ask():
             return jsonify({'answer': 'Please specify the city for the weather forecast. For example: weather in Bishkek'})
         return jsonify({'answer': 'Пожалуйста, укажи город для прогноза погоды. Например: погода в Бишкеке'})
 
-    # Курс валют
     if any(word in question for word in ['курс доллара', 'курс usd', 'курс доллар', 'usd rate', 'dollar rate']):
         rate = get_exchange_rate('USD', lang)
         return jsonify({'answer': rate})
@@ -159,7 +117,6 @@ def ask():
         rate = get_exchange_rate('EUR', lang)
         return jsonify({'answer': rate})
 
-    # Время и дата
     if any(word in question for word in ['время', 'который час', 'time']):
         tz = pytz.timezone('Asia/Bishkek')
         now = datetime.now(tz).strftime('%H:%M')
@@ -173,13 +130,11 @@ def ask():
             return jsonify({'answer': f'Today is {date}'})
         return jsonify({'answer': f'Сегодня {date}'})
 
-    # Команды завершения
     if any(word in question for word in ['стоп', 'выключись', 'закрой', 'stop']):
         if lang.startswith('en'):
             return jsonify({'answer': 'Okay, shutting down.'})
         return jsonify({'answer': 'Хорошо, отключаюсь.'})
 
-    # Умные фразы по умолчанию
     smart_phrases_ru = [
         "Интересная тема! Расскажи подробнее.",
         "Хм... любопытно. Давай разберёмся вместе!",
