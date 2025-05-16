@@ -4,12 +4,12 @@ import requests
 from datetime import datetime
 import pytz
 import traceback
+import re
 
 app = Flask(__name__)
 
 OWM_API_KEY = "dbf1c332caec3ca0dc92ec2136609b42"
 NEWSAPI_API_KEY = "8869a92ee6144ffda2a31e5efed6e222"
-
 
 def get_weather(city_name):
     try:
@@ -52,7 +52,7 @@ def get_news():
 
 def get_exchange_rate(currency_code):
     try:
-        url = "https://open.er-api.com/v6/latest/KGS"  # Курсы относительно сома
+        url = "https://open.er-api.com/v6/latest/KGS"
         res = requests.get(url, timeout=5)
         if res.status_code != 200:
             return "Не могу получить курс валют."
@@ -61,7 +61,8 @@ def get_exchange_rate(currency_code):
         rate = rates.get(currency_code)
         if not rate:
             return "Курс не найден."
-        return f"Текущий курс {currency_code} к сому: {rate:.2f}"
+        exchange_rate = 1 / rate
+        return f"Текущий курс {currency_code} к сому: {exchange_rate:.2f}"
     except Exception:
         return f"Ошибка при получении курса валют:\n{traceback.format_exc(limit=1)}"
 
@@ -74,15 +75,12 @@ def ask():
     data = request.get_json()
     question = data.get('question', '').lower()
 
-    # Приветствие
     if any(word in question for word in ['привет', 'здравствуй', 'hello']):
         return jsonify({'answer': 'Привет! Чем могу помочь?'})
 
-    # Как дела
     if any(word in question for word in ['как дела', 'как ты']):
         return jsonify({'answer': 'У меня всё отлично, спасибо!'})
 
-    # Шутка
     if any(word in question for word in ['шутка', 'расскажи шутку', 'анекдот']):
         jokes = [
             'Почему компьютер не может держать секреты? Потому что у него слишком много окон.',
@@ -91,10 +89,7 @@ def ask():
         ]
         return jsonify({'answer': random.choice(jokes)})
 
-    # Погода
     if 'погода' in question:
-        # Ищем город после "в" или "в городе"
-        import re
         city_match = re.search(r'погода в ([а-яА-ЯёЁ\s\-]+)', question)
         city = city_match.group(1).strip() if city_match else ''
         if city:
@@ -103,12 +98,10 @@ def ask():
         else:
             return jsonify({'answer': 'Пожалуйста, укажи город для прогноза погоды. Например: погода в Бишкеке'})
 
-    # Новости
     if any(word in question for word in ['новости', 'что нового', 'последние новости']):
         news = get_news()
         return jsonify({'answer': news})
 
-    # Курсы валют
     if any(word in question for word in ['курс доллара', 'курс usd', 'курс доллар']):
         rate = get_exchange_rate('USD')
         return jsonify({'answer': rate})
@@ -117,22 +110,18 @@ def ask():
         rate = get_exchange_rate('EUR')
         return jsonify({'answer': rate})
 
-    # Время
     if any(word in question for word in ['время', 'который час']):
         tz = pytz.timezone('Asia/Bishkek')
         now = datetime.now(tz).strftime('%H:%M')
         return jsonify({'answer': f'В Бишкеке сейчас {now}'})
 
-    # Дата
     if any(word in question for word in ['дата', 'какое число', 'число']):
         date = datetime.now().strftime('%d.%m.%Y')
         return jsonify({'answer': f'Сегодня {date}'})
 
-    # Стоп
     if any(word in question for word in ['стоп', 'выключись', 'закрой']):
         return jsonify({'answer': 'Хорошо, отключаюсь.'})
 
-    # Ответ по умолчанию
     smart_phrases = [
         "Интересная тема! Расскажи подробнее.",
         "Хм... любопытно. Давай разберёмся вместе!",
