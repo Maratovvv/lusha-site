@@ -113,7 +113,7 @@ function addMessage(sender, text) {
     box.scrollTop = box.scrollHeight;
 }
 
-// Получаем доступные голоса для синтеза
+// Голосовой синтез с выбором женского голоса
 const synth = window.speechSynthesis;
 let voices = [];
 
@@ -129,10 +129,18 @@ function speak(text, lang = 'ru-RU') {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
 
-    // Подбираем голос, который начинается с нужного языка
-    const voice = voices.find(v => v.lang.startsWith(lang));
-    if (voice) {
-        utterance.voice = voice;
+    // Ищем женский голос по языку
+    const femaleVoices = voices.filter(v =>
+        v.lang.startsWith(lang) &&
+        /female|woman|женский|google/i.test(v.name)
+    );
+
+    if (femaleVoices.length > 0) {
+        utterance.voice = femaleVoices[0];
+    } else {
+        // Если нет женских — берем любой подходящий голос
+        const voice = voices.find(v => v.lang.startsWith(lang));
+        if (voice) utterance.voice = voice;
     }
 
     synth.speak(utterance);
