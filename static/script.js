@@ -43,7 +43,7 @@ function drawParticle(p) {
         ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
     } else if (p.type === 'heart') {
         ctx.fillStyle = 'red';
-        const s = p.size * 1.5;  // увеличенный размер для сердца
+        const s = p.size * 1.5;
         ctx.beginPath();
         ctx.moveTo(0, s);
         ctx.bezierCurveTo(0, s - s * 1.2, -s, s - s * 1.2, -s, s / 3);
@@ -125,7 +125,7 @@ function sendQuestion() {
         const thankReply = 'Пожалуйста! Всегда рада помочь 😊';
         addMessage('bot', thankReply);
         speak(thankReply);
-        launchEffect('confetti'); // фантики
+        launchEffect('confetti');
         return;
     }
 
@@ -133,7 +133,7 @@ function sendQuestion() {
         const praiseReply = 'Спасибо! Мне очень приятно 😊';
         addMessage('bot', praiseReply);
         speak(praiseReply);
-        launchEffect('heart'); // сердечки
+        launchEffect('heart');
         return;
     }
 
@@ -148,14 +148,14 @@ function sendQuestion() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: input }),
     })
-    .then(res => res.json())
-    .then(data => {
-        const typingBox = document.getElementById('typing');
-        if (typingBox) typingBox.remove();
+        .then(res => res.json())
+        .then(data => {
+            const typingBox = document.getElementById('typing');
+            if (typingBox) typingBox.remove();
 
-        addMessage('bot', data.answer);
-        speak(data.answer);
-    });
+            addMessage('bot', data.answer);
+            speak(data.answer);
+        });
 }
 
 function quickAsk(text) {
@@ -187,6 +187,10 @@ function speak(text) {
     };
 
     synth.speak(utterance);
+}
+
+function clearChat() {
+    document.getElementById('chat-box').innerHTML = '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
